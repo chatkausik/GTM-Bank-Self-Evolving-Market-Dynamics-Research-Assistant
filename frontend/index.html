@@ -1103,13 +1103,192 @@ function buildMarkdown(d) {
 }
 
 function exportBrief(d) {
-  const md = buildMarkdown(d);
-  const blob = new Blob([md], {type:'text/markdown'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'gtm-brief.md';
-  a.click();
-  showToast('Brief exported as gtm-brief.md', 'success');
+  if (!d) { showToast('Run a research query first.', 'error'); return; }
+  const p = d.competitive_prd || {};
+
+  const featureRows = (p.key_features || []).map(f =>
+    `<tr><td><strong>${esc(f.name)}</strong><br><span style="font-size:11px;color:#555">${esc(f.description)}</span></td>
+     <td style="color:#7c3aed;font-size:11px">${f.beats ? '⚡ ' + esc(f.beats) : '—'}</td></tr>`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>GTM Research Brief — ${esc((p.product_name || 'GTM Bank'))}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 13px; color: #1e293b; background: #fff; padding: 32px 40px; line-height: 1.6; }
+  @media print {
+    body { padding: 0; }
+    .no-print { display: none !important; }
+    section { page-break-inside: avoid; }
+    h2 { page-break-before: auto; }
+  }
+  .header { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #4f46e5; padding-bottom: 16px; margin-bottom: 24px; }
+  .logo-box { width: 40px; height: 40px; background: linear-gradient(135deg,#4f46e5,#2563eb); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; flex-shrink: 0; }
+  .logo-name { font-size: 20px; font-weight: 800; color: #1e1b4b; }
+  .logo-sub  { font-size: 11px; color: #64748b; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: .5px; }
+  .badge-high   { background: #dcfce7; color: #166534; }
+  .badge-medium { background: #fef9c3; color: #854d0e; }
+  .badge-low    { background: #fee2e2; color: #991b1b; }
+  h1 { font-size: 17px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px; }
+  h2 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #6366f1; margin: 20px 0 8px; border-bottom: 1px solid #e0e7ff; padding-bottom: 4px; }
+  h3 { font-size: 12px; font-weight: 700; color: #374151; margin: 14px 0 6px; }
+  p  { font-size: 13px; color: #374151; margin-bottom: 8px; }
+  .strategy-box { background: #eef2ff; border: 1px solid #a5b4fc; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .strategy-text { font-size: 14px; font-weight: 600; color: #1e1b4b; line-height: 1.7; margin-bottom: 10px; }
+  .summary-text { font-size: 12.5px; color: #475569; line-height: 1.7; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+  .box.green { border-color: #6ee7b7; background: #f0fdf4; }
+  .box.red   { border-color: #fca5a5; background: #fef2f2; }
+  .box.amber { border-color: #fcd34d; background: #fffbeb; }
+  .box.purple{ border-color: #c4b5fd; background: #f5f3ff; }
+  .box-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+  .box-label.green  { color: #059669; }
+  .box-label.red    { color: #dc2626; }
+  .box-label.amber  { color: #b45309; }
+  .box-label.purple { color: #7c3aed; }
+  ul { padding-left: 16px; margin: 0; }
+  ul li { margin-bottom: 4px; font-size: 12.5px; color: #475569; }
+  ol { padding-left: 18px; }
+  ol li { margin-bottom: 5px; font-size: 12.5px; color: #374151; }
+  .contrast-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .win-card  { background: #f0fdf4; border: 1px solid #6ee7b7; border-radius: 8px; padding: 12px; }
+  .fail-card { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 12px; }
+  .card-lbl  { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 5px; }
+  .win-card  .card-lbl { color: #059669; }
+  .fail-card .card-lbl { color: #dc2626; }
+  .card-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+  .card-seg   { font-size: 11px; color: #64748b; font-style: italic; margin-bottom: 5px; }
+  .card-body  { font-size: 11.5px; color: #475569; }
+  .prd-banner { background: linear-gradient(135deg,#eef2ff,#fdf4ff); border: 2px solid #6366f1; border-radius: 12px; padding: 20px; margin-top: 20px; }
+  .prd-name   { font-size: 20px; font-weight: 900; color: #1e1b4b; }
+  .prd-tag    { font-size: 13px; color: #6366f1; font-style: italic; margin: 4px 0 16px; }
+  table       { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th          { background: #f1f5f9; text-align: left; padding: 7px 10px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #64748b; }
+  td          { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+  .metric-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .metric-pill  { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+  .scope-box  { border-radius: 8px; padding: 12px; }
+  .scope-box.mvp { background: #f0fdf4; border: 1px solid #6ee7b7; }
+  .scope-box.v2  { background: #f5f3ff; border: 1px solid #c4b5fd; }
+  .why-box    { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 12.5px; color: #78350f; }
+  .footer     { margin-top: 32px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 10.5px; color: #94a3b8; text-align: center; }
+  .print-btn  { position: fixed; top: 16px; right: 16px; background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(79,70,229,.3); }
+  .print-btn:hover { background: #4338ca; }
+</style>
+</head><body>
+<button class="print-btn no-print" onclick="window.print()">⬇ Save as PDF</button>
+
+<div class="header">
+  <div class="logo-box">⚡</div>
+  <div><div class="logo-name">GTM Bank</div><div class="logo-sub">Self-Evolving Market Dynamics Research Assistant · Powered by ReasoningBank + Live Web Intel</div></div>
+</div>
+
+<div class="strategy-box">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#6366f1;">Recommended Positioning Strategy</span>
+    <span class="badge badge-${esc(d.confidence||'medium')}">${esc(d.confidence||'medium')} confidence</span>
+    ${d.web_intel_used ? '<span style="font-size:10px;background:#dcfce7;border:1px solid #6ee7b7;color:#059669;padding:2px 8px;border-radius:20px;font-weight:600;">🌐 Live web research</span>' : ''}
+  </div>
+  <div class="strategy-text">${esc(d.positioning_strategy)}</div>
+  <div class="summary-text">${esc(d.summary)}</div>
+</div>
+
+<div class="two-col">
+  <div class="box green">
+    <div class="box-label green">Key Success Factors</div>
+    <ul>${(d.key_success_factors||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+  </div>
+  <div class="box red">
+    <div class="box-label red">Risk Factors</div>
+    <ul>${(d.risk_factors||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+  </div>
+</div>
+
+<div class="box amber" style="margin-bottom:14px;">
+  <div class="box-label amber">🛡 Guardrails from Past Failures</div>
+  <ul>${(d.guardrails||[]).map(g=>`<li>${esc(g)}</li>`).join('')}</ul>
+</div>
+
+<div class="box purple" style="margin-bottom:14px;">
+  <div class="box-label purple">Competitor Intelligence</div>
+  <p style="margin:0;font-size:12.5px;color:#374151;">${esc(d.competitor_intelligence)}</p>
+</div>
+
+${(()=>{
+  const wins = (d.analogous_wins||[]).slice(0,2);
+  const fails = (d.analogous_failures||[]).slice(0,2);
+  const n = Math.max(wins.length, fails.length);
+  if (!n) return '';
+  let html2 = '<h2 style="color:#1e1b4b;">Analogous Cases — Contrastive Memory</h2>';
+  for (let i=0;i<n;i++){
+    const w=wins[i],f=fails[i];
+    html2 += `<div class="contrast-row">
+      <div class="win-card"><div class="card-lbl">▲ Similar Win</div>
+        ${w?`<div class="card-title">${esc(w.title)}</div><div class="card-seg">${esc(w.segment)}</div><div class="card-body">${esc(w.why_it_worked)}</div>`:'<div class="card-body" style="color:#94a3b8">—</div>'}
+      </div>
+      <div class="fail-card"><div class="card-lbl">▼ Similar Failure</div>
+        ${f?`<div class="card-title">${esc(f.title)}</div><div class="card-seg">${esc(f.segment)}</div><div class="card-body">${esc(f.why_it_failed)}</div>`:'<div class="card-body" style="color:#94a3b8">—</div>'}
+      </div>
+    </div>`;
+  }
+  return html2;
+})()}
+
+<h2 style="color:#2563eb;">Recommended Next Steps</h2>
+<ol>${(d.recommended_next_steps||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+
+${p.product_name ? `
+<div class="prd-banner">
+  <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#6366f1;margin-bottom:10px;">⚙ Competitive PRD Recommendation</div>
+  <div class="prd-name">${esc(p.product_name)}</div>
+  <div class="prd-tag">"${esc(p.tagline||'')}"</div>
+
+  <div class="two-col" style="margin-bottom:12px;">
+    <div class="box"><div class="box-label" style="color:#6366f1;">🎯 Product Vision</div><p style="margin:0;font-size:12px;">${esc(p.vision||'')}</p></div>
+    <div class="box"><div class="box-label" style="color:#6366f1;">👤 Ideal Customer Profile</div><p style="margin:0;font-size:12px;">${esc(p.target_icp||'')}</p></div>
+  </div>
+
+  <div class="box" style="margin-bottom:12px;">
+    <div class="box-label" style="color:#6366f1;">💡 Market Opportunity</div>
+    <p style="margin:0;font-size:12px;">${esc(p.market_opportunity||'')}</p>
+  </div>
+
+  <h3 style="color:#1e1b4b;">⚙ Key Features — Differentiated from Competitors</h3>
+  <table><thead><tr><th>Feature</th><th>Beats Competitor</th></tr></thead><tbody>${featureRows}</tbody></table>
+
+  <div class="two-col" style="margin-top:12px;">
+    <div class="box"><div class="box-label" style="color:#6366f1;">💰 Pricing Strategy</div><p style="margin:0;font-size:12px;">${esc(p.pricing_strategy||'')}</p></div>
+    <div class="box"><div class="box-label" style="color:#6366f1;">🚀 GTM Motion</div><p style="margin:0;font-size:12px;">${esc(p.go_to_market_motion||'')}</p></div>
+  </div>
+
+  <h3 style="color:#1d4ed8;margin-top:12px;">📊 Success Metrics</h3>
+  <div class="metric-pills">${(p.success_metrics||[]).map(m=>`<span class="metric-pill">${esc(m)}</span>`).join('')}</div>
+
+  <div class="scope-grid">
+    <div class="scope-box mvp">
+      <div class="box-label green">✓ MVP Scope</div>
+      <ul>${(p.mvp_scope||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    </div>
+    <div class="scope-box v2">
+      <div class="box-label" style="color:#7c3aed;">◦ Phase 2</div>
+      <ul>${(p.phase_2||[]).map(f=>`<li>${esc(f)}</li>`).join('')}</ul>
+    </div>
+  </div>
+
+  <div class="why-box"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#b45309;">⏰ Why Now —</strong> ${esc(p.why_now||'')}</div>
+</div>` : ''}
+
+<div class="footer">Generated by GTM Bank — Self-Evolving Market Dynamics Research Assistant · ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</div>
+</body></html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  showToast('PDF preview opened — click "Save as PDF"', 'success');
 }
 
 function copyBrief(d) {
