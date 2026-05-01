@@ -473,6 +473,33 @@
   .spinner { width:34px; height:34px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin .75s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
   .loader-text { color:var(--text-muted); font-size:13px; font-weight:500; }
+  .loader-progress { width:220px; height:3px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .loader-bar { height:100%; background:linear-gradient(90deg,var(--primary),var(--blue)); border-radius:3px; transition:width .6s ease; }
+
+  /* ── Devil's Advocate / Challenge ─────────── */
+  .challenge-card { background:#fff0f0; border:2px solid #fca5a5; border-radius:14px; padding:20px; margin-bottom:14px; }
+  .challenge-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .challenge-icon { font-size:22px; }
+  .challenge-title { font-size:14px; font-weight:800; color:#7f1d1d; }
+  .challenge-verdict { display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; padding:3px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:.6px; margin-left:auto; }
+  .verdict-proceed   { background:#dcfce7; color:#166534; }
+  .verdict-reconsider{ background:#fef9c3; color:#854d0e; }
+  .verdict-abandon   { background:#fee2e2; color:#991b1b; }
+  .challenge-section { margin-bottom:12px; }
+  .challenge-section-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#9f1239; margin-bottom:6px; }
+  .challenge-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+  .challenge-box { background:#fff; border:1px solid #fca5a5; border-radius:8px; padding:11px; }
+  .challenge-box-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:#be123c; margin-bottom:6px; }
+  .challenge-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
+  .challenge-list li { font-size:12px; color:#374151; display:flex; gap:6px; align-items:flex-start; }
+  .challenge-list li::before { content:"→"; color:#e11d48; flex-shrink:0; }
+  .challenge-worst { background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:12px; margin-bottom:12px; font-size:12.5px; color:#7f1d1d; line-height:1.65; }
+  .challenge-alt { background:#f0fdf4; border:1px solid #6ee7b7; border-radius:8px; padding:12px; font-size:12.5px; color:#14532d; line-height:1.65; }
+  .challenge-rationale { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:12px; margin-top:10px; font-size:12.5px; color:#7c2d12; line-height:1.65; font-style:italic; }
+
+  /* ── Load History button ──────────────────── */
+  .btn-history { width:100%; justify-content:center; margin-top:12px; background:linear-gradient(135deg,#1e1b4b,#312e81); color:#fff; border:none; }
+  .btn-history:hover { background:linear-gradient(135deg,#312e81,#4f46e5); }
 
   .placeholder { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; gap:8px; }
   .placeholder-icon { font-size:42px; }
@@ -552,7 +579,11 @@
         </div>
       </div>
 
-      <div class="loader" id="loader"><div class="spinner"></div><div class="loader-text" id="loader-text">🌐 Searching competitor web intel + ReasoningBank…</div></div>
+      <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loader-text">🌐 Searching competitor web intel + ReasoningBank…</div>
+        <div class="loader-progress"><div class="loader-bar" id="loader-bar" style="width:10%"></div></div>
+      </div>
       <div id="results"></div>
 
       <div class="placeholder" id="placeholder">
@@ -633,6 +664,10 @@
     <div class="side-content" id="tab-memories">
       <div class="sidebar-section-label">All Memories in the ReasoningBank</div>
       <div id="memories-list"><div style="color:var(--text-muted);font-size:13px;text-align:center;padding:24px;">Loading…</div></div>
+      <button class="btn btn-history" id="history-btn" onclick="loadFiservHistory()" title="Load 13 real Fiserv product memories from 2015–2025">
+        🏦 Load Fiserv Product History (2015–2025)
+      </button>
+      <div id="history-result" style="margin-top:8px;font-size:12px;"></div>
     </div>
 
     <div class="side-content" id="tab-ingest" style="display:none;">
@@ -779,28 +814,67 @@ async function loadMemories() {
   } catch { el.innerHTML = '<div style="color:var(--failure);font-size:13px;padding:12px;">Failed to load.</div>'; }
 }
 
-// ── Research ────────────────────────────────────────────────────────
+// ── Research (streaming) ─────────────────────────────────────────────
 async function runQuery() {
   const query = document.getElementById('query-input').value.trim();
   if (!query) { showToast('Enter a query first.', 'error'); return; }
   const segment = document.getElementById('segment-filter').value;
-  const btn = document.getElementById('search-btn');
+  const btn     = document.getElementById('search-btn');
+  const loaderText = document.getElementById('loader-text');
+  const loaderBar  = document.getElementById('loader-bar');
+
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('results').innerHTML = '';
   document.getElementById('loader').classList.add('active');
   btn.disabled = true;
+  if (loaderBar) loaderBar.style.width = '10%';
+
   try {
-    const r = await fetch('/api/query', { method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ query, merchant_segment: segment||null, n_results:6 }) });
-    if (!r.ok) throw new Error((await r.json()).detail||'Request failed');
-    const d = await r.json();
-    chatState = { query, memories: d.memories_used||[], history:[] };
-    renderResults(d);
+    const response = await fetch('/api/query/stream', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ query, merchant_segment: segment||null, n_results: 6 }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || 'Request failed');
+    }
+
+    const reader  = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') break;
+        const event = JSON.parse(raw);
+        if (event.type === 'status') {
+          if (loaderText) loaderText.textContent = event.message;
+          if (loaderBar && event.pct) loaderBar.style.width = event.pct + '%';
+        } else if (event.type === 'result') {
+          if (loaderBar) loaderBar.style.width = '100%';
+          chatState = { query, memories: event.data.memories_used||[], history: [] };
+          renderResults(event.data);
+        } else if (event.type === 'error') {
+          throw new Error(event.message);
+        }
+      }
+    }
   } catch(e) {
-    showToast(e.message,'error');
+    showToast(e.message, 'error');
     document.getElementById('placeholder').style.display = 'flex';
   } finally {
     document.getElementById('loader').classList.remove('active');
+    if (loaderBar) loaderBar.style.width = '10%';
     btn.disabled = false;
   }
 }
@@ -930,6 +1004,7 @@ function renderResults(d) {
           <div class="strategy-actions">
             <button class="btn btn-ghost btn-sm btn-icon" title="Export brief" onclick="exportBrief(window._lastResult)">↓ Export</button>
             <button class="btn btn-ghost btn-sm btn-icon" title="Copy markdown" onclick="copyBrief(window._lastResult)">⎘ Copy</button>
+            <button class="btn btn-ghost btn-sm btn-icon" id="challenge-btn" title="Devil's Advocate — stress-test this strategy" onclick="challengeStrategy()" style="color:#be123c;border-color:#fca5a5;">👿 Challenge</button>
           </div>
         </div>
       </div>
@@ -972,6 +1047,8 @@ function renderResults(d) {
     </div>
 
     ${renderPRD(d)}
+
+    <div id="challenge-result"></div>
 
     <div class="card chat-section" id="chat-card">
       <div class="chat-header">
@@ -1045,6 +1122,126 @@ function clearResults() {
   document.getElementById('segment-filter').value = '';
   document.getElementById('placeholder').style.display = 'flex';
   chatState = { query:'', memories:[], history:[] };
+}
+
+// ── Devil's Advocate — Challenge Strategy ────────────────────────────
+async function challengeStrategy() {
+  const d = window._lastResult;
+  if (!d) { showToast('Run a research query first.', 'error'); return; }
+
+  const btn = document.getElementById('challenge-btn');
+  const out = document.getElementById('challenge-result');
+  btn.disabled = true;
+  btn.textContent = '👿 Challenging…';
+  out.innerHTML = `<div class="loader active" style="padding:30px 0;"><div class="spinner"></div><div class="loader-text">Running devil's advocate analysis…</div></div>`;
+  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const r = await fetch('/api/challenge', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ strategy: d.positioning_strategy, query: chatState.query || d.summary }),
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || 'Challenge failed');
+    const result = await r.json();
+    out.innerHTML = renderChallenge(result);
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch(e) {
+    out.innerHTML = '';
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '👿 Challenge';
+  }
+}
+
+function renderChallenge(c) {
+  const verdictClass = {
+    'PROCEED': 'verdict-proceed',
+    'RECONSIDER': 'verdict-reconsider',
+    'ABANDON': 'verdict-abandon',
+  }[c.devils_verdict] || 'verdict-reconsider';
+
+  const listItems = (arr) => (arr||[]).map(x=>`<li>${esc(x)}</li>`).join('');
+
+  return `
+  <div class="challenge-card">
+    <div class="challenge-header">
+      <span class="challenge-icon">👿</span>
+      <span class="challenge-title">Devil's Advocate Analysis</span>
+      <span class="challenge-verdict ${verdictClass}">${c.devils_verdict || 'RECONSIDER'}</span>
+    </div>
+
+    <div class="challenge-worst">
+      <div class="challenge-box-label" style="color:#9f1239;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">☠ Worst-Case Scenario</div>
+      ${esc(c.worst_case_scenario || '')}
+    </div>
+
+    <div class="challenge-grid">
+      <div class="challenge-box">
+        <div class="challenge-box-label">Critical Blind Spots</div>
+        <ul class="challenge-list">${listItems(c.critical_blind_spots)}</ul>
+      </div>
+      <div class="challenge-box">
+        <div class="challenge-box-label">Failure Conditions</div>
+        <ul class="challenge-list">${listItems(c.failure_conditions)}</ul>
+      </div>
+    </div>
+
+    <div class="challenge-grid">
+      <div class="challenge-box">
+        <div class="challenge-box-label">Underestimated Risks</div>
+        <ul class="challenge-list">${listItems(c.underestimated_risks)}</ul>
+      </div>
+      <div class="challenge-box">
+        <div class="challenge-box-label">Competitor Counter-Moves</div>
+        <ul class="challenge-list">${listItems(c.competitor_counter_moves)}</ul>
+      </div>
+    </div>
+
+    <div class="challenge-section">
+      <div class="challenge-section-label">Board Pressure-Test Questions</div>
+      <ul class="challenge-list" style="background:#fff;border:1px solid #fca5a5;border-radius:8px;padding:11px 11px 11px 28px;">${(c.pressure_test_questions||[]).map(q=>`<li style="list-style:disc;display:list-item;">${esc(q)}</li>`).join('')}</ul>
+    </div>
+
+    <div class="challenge-section">
+      <div class="challenge-section-label">Critical Unknowns to Validate</div>
+      <ul class="challenge-list">${listItems(c.confidence_gaps)}</ul>
+    </div>
+
+    <div class="challenge-alt">
+      <div class="challenge-box-label" style="color:#065f46;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">✦ Alternative Hypothesis</div>
+      ${esc(c.alternative_hypothesis || '')}
+    </div>
+
+    <div class="challenge-rationale">"${esc(c.devils_rationale || '')}"</div>
+  </div>`;
+}
+
+// ── Load Fiserv Product History ──────────────────────────────────────
+async function loadFiservHistory() {
+  const btn = document.getElementById('history-btn');
+  const out = document.getElementById('history-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Loading…';
+  out.innerHTML = '';
+  try {
+    const r = await fetch('/api/load_fiserv_history', { method: 'POST' });
+    if (!r.ok) throw new Error((await r.json()).detail || 'Failed');
+    const d = await r.json();
+    if (d.new === 0) {
+      out.innerHTML = `<span style="color:var(--text-muted)">Already loaded (${d.total} total memories)</span>`;
+    } else {
+      out.innerHTML = `<span style="color:var(--success)">✓ Added ${d.new} Fiserv memories — bank now has ${d.total} total</span>`;
+      await Promise.all([loadStats(), loadMemories()]);
+    }
+    showToast(`Fiserv history: ${d.new} new memories added`, d.new > 0 ? 'success' : 'info');
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--failure)">${e.message}</span>`;
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🏦 Load Fiserv Product History (2015–2025)';
+  }
 }
 function fillQuery(btn) { document.getElementById('query-input').value = btn.textContent.trim(); document.getElementById('query-input').focus(); }
 function tryExample(btn) { document.getElementById('query-input').value = btn.textContent.trim(); switchMainTab('research', document.querySelector('.main-nav-tab')); document.querySelectorAll('.main-nav-tab').forEach((t,i)=>t.classList.toggle('active',i===0)); runQuery(); }

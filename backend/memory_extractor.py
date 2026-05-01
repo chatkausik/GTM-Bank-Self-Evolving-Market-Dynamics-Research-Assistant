@@ -1,25 +1,7 @@
-import json
 import uuid
 from datetime import datetime
-import anthropic
 from .models import Memory
-
-
-def _client() -> anthropic.Anthropic:
-    return anthropic.Anthropic()
-
-
-def _parse_json(text: str):
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1] if "\n" in text else text
-        text = text.rsplit("```", 1)[0].strip()
-    start = text.find("[") if text.find("[") != -1 and (text.find("{") == -1 or text.find("[") < text.find("{")) else text.find("{")
-    if start != -1:
-        end = text.rfind("]") if text[start] == "[" else text.rfind("}")
-        if end > start:
-            text = text[start:end+1]
-    return json.loads(text)
+from .utils import parse_json, anthropic_client
 
 _SYSTEM = [
     {
@@ -52,7 +34,7 @@ Return a JSON array. Each object must have exactly these keys:
 
 JSON array:"""
 
-    response = _client().messages.create(
+    response = anthropic_client().messages.create(
         model="claude-sonnet-4-6",
         max_tokens=2000,
         system=_SYSTEM,
@@ -60,7 +42,7 @@ JSON array:"""
     )
 
     raw = response.content[0].text
-    data = _parse_json(raw)
+    data = parse_json(raw)
 
     memories = []
     for item in data:
@@ -111,7 +93,7 @@ Return a JSON array with the same schema as above (title, description, content, 
 
 JSON array:"""
 
-    response = _client().messages.create(
+    response = anthropic_client().messages.create(
         model="claude-sonnet-4-6",
         max_tokens=1500,
         system=_SYSTEM,
@@ -119,7 +101,7 @@ JSON array:"""
     )
 
     raw = response.content[0].text
-    data = _parse_json(raw)
+    data = parse_json(raw)
 
     memories = []
     for item in data:

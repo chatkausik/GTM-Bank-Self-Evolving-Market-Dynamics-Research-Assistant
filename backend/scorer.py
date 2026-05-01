@@ -1,16 +1,4 @@
-import json
-import anthropic
-
-
-def _parse_json(text: str):
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1] if "\n" in text else text
-        text = text.rsplit("```", 1)[0].strip()
-    start, end = text.find("{"), text.rfind("}")
-    if start != -1 and end > start:
-        text = text[start:end+1]
-    return json.loads(text)
+from .utils import parse_json, anthropic_client
 
 _SYSTEM = [
     {
@@ -81,10 +69,10 @@ Scoring guide:
 
 JSON:"""
 
-    response = anthropic.Anthropic().messages.create(
+    response = anthropic_client().messages.create(
         model="claude-sonnet-4-6",
         max_tokens=2000,
         system=_SYSTEM,
         messages=[{"role": "user", "content": prompt}],
     )
-    return _parse_json(response.content[0].text)
+    return parse_json(response.content[0].text)
