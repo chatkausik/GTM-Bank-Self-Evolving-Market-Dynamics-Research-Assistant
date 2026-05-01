@@ -7,6 +7,9 @@ def _parse_json(text: str):
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text
         text = text.rsplit("```", 1)[0].strip()
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end > start:
+        text = text[start:end+1]
     return json.loads(text)
 
 _SYSTEM = [

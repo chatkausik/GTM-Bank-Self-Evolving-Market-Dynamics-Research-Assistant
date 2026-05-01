@@ -361,6 +361,67 @@
   .comp-pill { font-size:11px; padding:3px 8px; border-radius:4px; border:1px solid; font-weight:500; }
   .comp-counter { font-size:12.5px; color:var(--text-muted); line-height:1.6; border-top:1px solid var(--border); padding-top:10px; margin-top:6px; }
 
+  /* ── Competitive PRD ────────────────────── */
+  .prd-card {
+    border: 2px solid #6366f1; background: linear-gradient(135deg,#f0f4ff 0%,#fdf4ff 100%);
+    border-radius: 16px; padding: 24px; margin-bottom: 14px;
+    box-shadow: 0 4px 20px rgba(99,102,241,.12);
+  }
+  .prd-eyebrow {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px;
+    color: #6366f1; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .prd-eyebrow-line { flex: 1; height: 1px; background: #c7d2fe; }
+  .prd-product-name { font-size: 22px; font-weight: 900; color: #1e1b4b; line-height: 1.2; margin-bottom: 4px; }
+  .prd-tagline { font-size: 13.5px; color: #6366f1; font-style: italic; font-weight: 500; margin-bottom: 18px; }
+  .prd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .prd-section { background: #fff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 14px; }
+  .prd-section-label {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    color: #6366f1; margin-bottom: 8px;
+  }
+  .prd-section-text { font-size: 12.5px; color: #374151; line-height: 1.65; }
+  .prd-feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .prd-feature-card {
+    background: #fff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 14px;
+    transition: box-shadow .15s;
+  }
+  .prd-feature-card:hover { box-shadow: 0 2px 8px rgba(99,102,241,.15); }
+  .prd-feature-name { font-size: 13px; font-weight: 700; color: #1e1b4b; margin-bottom: 5px; }
+  .prd-feature-desc { font-size: 12px; color: #6b7280; line-height: 1.55; margin-bottom: 8px; }
+  .prd-beats-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 600; padding: 3px 9px;
+    background: #fdf4ff; border: 1px solid #e9d5ff; color: #7c3aed; border-radius: 20px;
+  }
+  .prd-diff-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .prd-diff-item {
+    display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px;
+    color: #374151; line-height: 1.5;
+  }
+  .prd-diff-item::before { content: "→"; color: #6366f1; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .prd-scope-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .prd-scope-card { background: #fff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 13px; }
+  .prd-scope-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .prd-scope-label.mvp { color: #059669; }
+  .prd-scope-label.v2  { color: #6366f1; }
+  .prd-check-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .prd-check-item { display: flex; gap: 7px; align-items: flex-start; font-size: 12px; color: #4b5563; line-height: 1.5; }
+  .prd-check-item.mvp::before { content: "✓"; color: #059669; font-weight: 700; flex-shrink: 0; }
+  .prd-check-item.v2::before  { content: "◦"; color: #6366f1; font-weight: 700; flex-shrink: 0; }
+  .prd-metrics-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .prd-metric-pill {
+    background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8;
+    font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+  }
+  .prd-why-now { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 14px; }
+  .prd-why-now-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #b45309; margin-bottom: 6px; }
+  .prd-why-now-text { font-size: 12.5px; color: #78350f; line-height: 1.65; }
+  .web-search-badge {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 600;
+    padding: 3px 10px; background: #ecfdf5; border: 1px solid #6ee7b7; color: #059669;
+    border-radius: 20px; margin-left: 8px;
+  }
+
   /* ── Memory Bank sidebar ─────────────────── */
   .sidebar-section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
   .memory-item { padding:11px 13px; border-radius:10px; border:1px solid var(--border); margin-bottom:8px; background:#fff; transition:box-shadow .15s,border-color .15s; }
@@ -491,7 +552,7 @@
         </div>
       </div>
 
-      <div class="loader" id="loader"><div class="spinner"></div><div class="loader-text">Querying ReasoningBank…</div></div>
+      <div class="loader" id="loader"><div class="spinner"></div><div class="loader-text" id="loader-text">🌐 Searching competitor web intel + ReasoningBank…</div></div>
       <div id="results"></div>
 
       <div class="placeholder" id="placeholder">
@@ -744,6 +805,98 @@ async function runQuery() {
   }
 }
 
+function renderPRD(d) {
+  const p = d.competitive_prd;
+  if (!p) return '';
+
+  const featureCards = (p.key_features || []).map(f => `
+    <div class="prd-feature-card">
+      <div class="prd-feature-name">${esc(f.name)}</div>
+      <div class="prd-feature-desc">${esc(f.description)}</div>
+      ${f.beats ? `<span class="prd-beats-badge">⚡ Beats ${esc(f.beats)}</span>` : ''}
+    </div>`).join('');
+
+  const diffs = (p.differentiators || []).map(d => `
+    <li class="prd-diff-item">${esc(d)}</li>`).join('');
+
+  const metrics = (p.success_metrics || []).map(m =>
+    `<span class="prd-metric-pill">📊 ${esc(m)}</span>`).join('');
+
+  const mvpItems = (p.mvp_scope || []).map(f =>
+    `<li class="prd-check-item mvp">${esc(f)}</li>`).join('');
+  const v2Items = (p.phase_2 || []).map(f =>
+    `<li class="prd-check-item v2">${esc(f)}</li>`).join('');
+
+  const webBadge = d.web_intel_used
+    ? `<span class="web-search-badge">🌐 Live web research</span>` : '';
+
+  return `
+    <div class="prd-card">
+      <div class="prd-eyebrow">
+        Competitive PRD Recommendation${webBadge}
+        <div class="prd-eyebrow-line"></div>
+        Powered by ReasoningBank + Live Web Intel
+      </div>
+
+      <div class="prd-product-name">${esc(p.product_name || 'Fiserv Product Recommendation')}</div>
+      <div class="prd-tagline">"${esc(p.tagline || '')}"</div>
+
+      <div class="prd-two-col">
+        <div class="prd-section">
+          <div class="prd-section-label">🎯 Product Vision</div>
+          <div class="prd-section-text">${esc(p.vision || '')}</div>
+        </div>
+        <div class="prd-section">
+          <div class="prd-section-label">👤 Ideal Customer Profile</div>
+          <div class="prd-section-text">${esc(p.target_icp || '')}</div>
+        </div>
+      </div>
+
+      <div class="prd-section" style="margin-bottom:14px;">
+        <div class="prd-section-label">💡 Market Opportunity</div>
+        <div class="prd-section-text">${esc(p.market_opportunity || '')}</div>
+      </div>
+
+      <div class="prd-section-label" style="color:#1e1b4b;font-size:11px;margin-bottom:8px;">⚙️ KEY FEATURES — DIFFERENTIATED FROM COMPETITORS</div>
+      <div class="prd-feature-grid">${featureCards}</div>
+
+      <div class="prd-section" style="margin-bottom:14px;">
+        <div class="prd-section-label">🏆 Differentiators vs. Stripe / Adyen / Square</div>
+        <ul class="prd-diff-list">${diffs}</ul>
+      </div>
+
+      <div class="prd-two-col">
+        <div class="prd-section">
+          <div class="prd-section-label">💰 Pricing Strategy</div>
+          <div class="prd-section-text">${esc(p.pricing_strategy || '')}</div>
+        </div>
+        <div class="prd-section">
+          <div class="prd-section-label">🚀 Go-To-Market Motion</div>
+          <div class="prd-section-text">${esc(p.go_to_market_motion || '')}</div>
+        </div>
+      </div>
+
+      <div class="prd-section-label" style="color:#1d4ed8;font-size:11px;margin:14px 0 8px;">📊 SUCCESS METRICS</div>
+      <div class="prd-metrics-row">${metrics}</div>
+
+      <div class="prd-scope-grid">
+        <div class="prd-scope-card">
+          <div class="prd-scope-label mvp">✓ MVP Scope</div>
+          <ul class="prd-check-list">${mvpItems}</ul>
+        </div>
+        <div class="prd-scope-card">
+          <div class="prd-scope-label v2">◦ Phase 2</div>
+          <ul class="prd-check-list">${v2Items}</ul>
+        </div>
+      </div>
+
+      <div class="prd-why-now">
+        <div class="prd-why-now-label">⏰ Why Now</div>
+        <div class="prd-why-now-text">${esc(p.why_now || '')}</div>
+      </div>
+    </div>`;
+}
+
 function renderResults(d) {
   const wins  = (d.analogous_wins   ||[]).slice(0,2);
   const fails = (d.analogous_failures||[]).slice(0,2);
@@ -817,6 +970,8 @@ function renderResults(d) {
       <div class="section-title">ReasoningBank Sources — ${(d.memories_used||[]).length} memories</div>
       <div class="sources-row">${memTags}</div>
     </div>
+
+    ${renderPRD(d)}
 
     <div class="card chat-section" id="chat-card">
       <div class="chat-header">
@@ -911,6 +1066,37 @@ function buildMarkdown(d) {
   }
   if ((d.analogous_failures||[]).length) {
     md += `## Analogous Failures\n${d.analogous_failures.map(f=>`- **${f.title}** (${f.segment}): ${f.why_it_failed}`).join('\n')}\n\n`;
+  }
+  const p = d.competitive_prd;
+  if (p) {
+    md += `---\n\n# Competitive PRD Recommendation\n\n`;
+    md += `## ${p.product_name || 'Fiserv Product'}\n\n`;
+    md += `> *"${p.tagline}"*\n\n`;
+    md += `**Vision:** ${p.vision}\n\n`;
+    md += `**Target ICP:** ${p.target_icp}\n\n`;
+    md += `**Market Opportunity:** ${p.market_opportunity}\n\n`;
+    if ((p.key_features||[]).length) {
+      md += `### Key Features\n`;
+      p.key_features.forEach(f => {
+        md += `- **${f.name}**: ${f.description}${f.beats ? ` *(Beats ${f.beats})*` : ''}\n`;
+      });
+      md += '\n';
+    }
+    if ((p.differentiators||[]).length) {
+      md += `### Differentiators vs Competition\n${p.differentiators.map(d=>`- ${d}`).join('\n')}\n\n`;
+    }
+    md += `**Pricing Strategy:** ${p.pricing_strategy}\n\n`;
+    md += `**GTM Motion:** ${p.go_to_market_motion}\n\n`;
+    if ((p.success_metrics||[]).length) {
+      md += `### Success Metrics\n${p.success_metrics.map(m=>`- ${m}`).join('\n')}\n\n`;
+    }
+    if ((p.mvp_scope||[]).length) {
+      md += `### MVP Scope\n${p.mvp_scope.map(f=>`- ✓ ${f}`).join('\n')}\n\n`;
+    }
+    if ((p.phase_2||[]).length) {
+      md += `### Phase 2\n${p.phase_2.map(f=>`- ◦ ${f}`).join('\n')}\n\n`;
+    }
+    md += `**Why Now:** ${p.why_now}\n\n`;
   }
   md += `---\n*Generated by GTM Bank — Self-Evolving Market Dynamics Research Assistant*`;
   return md;

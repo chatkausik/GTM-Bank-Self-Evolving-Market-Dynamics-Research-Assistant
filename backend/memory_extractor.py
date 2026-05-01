@@ -14,6 +14,11 @@ def _parse_json(text: str):
     if text.startswith("```"):
         text = text.split("\n", 1)[1] if "\n" in text else text
         text = text.rsplit("```", 1)[0].strip()
+    start = text.find("[") if text.find("[") != -1 and (text.find("{") == -1 or text.find("[") < text.find("{")) else text.find("{")
+    if start != -1:
+        end = text.rfind("]") if text[start] == "[" else text.rfind("}")
+        if end > start:
+            text = text[start:end+1]
     return json.loads(text)
 
 _SYSTEM = [
