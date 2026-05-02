@@ -1,11 +1,11 @@
-# GTM Bank — Self-Evolving Market Dynamics Research Assistant
+# GTM Product Analyzer Agent — Self-Evolving Market Dynamics Research Assistant
 ### Product Requirements Document
 
 ---
 
 ## Executive Summary
 
-GTM Bank is a self-evolving AI research assistant for Go-To-Market strategy, embedded within the Product Development Lifecycle (PDLC). Inspired by the **ReasoningBank** architecture (Ouyang et al., Google Cloud AI Research / UIUC / Yale), it continuously learns from both successes and failures across every product launch — accumulating institutional memory that makes each future GTM decision smarter than the last.
+GTM Product Analyzer Agent is a self-evolving AI research assistant for Go-To-Market strategy, embedded within the Product Development Lifecycle (PDLC). Inspired by the **ReasoningBank** architecture (Ouyang et al., Google Cloud AI Research / UIUC / Yale), it continuously learns from both successes and failures across every product launch — accumulating institutional memory that makes each future GTM decision smarter than the last.
 
 > *"What if every product decision at Fiserv was informed not just by what worked, but by a self-evolving AI that learned from every failure across our entire PDLC history — turning past mistakes into future competitive advantages?"*
 
@@ -15,7 +15,7 @@ GTM Bank is a self-evolving AI research assistant for Go-To-Market strategy, emb
 
 Competitors like Stripe, Adyen, and Square optimize exclusively from wins. No one systematically mines **why products underperformed** at scale. The result: teams repeat the same positioning mistakes, re-learn the same merchant segment lessons, and waste cycles on failed GTM strategies that were already tried and documented somewhere in a Confluence page no one reads.
 
-GTM Bank solves this by making failure a **first-class strategic input**.
+GTM Product Analyzer Agent solves this by making failure a **first-class strategic input**.
 
 ---
 

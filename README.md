@@ -1,4 +1,4 @@
-# GTM Bank — Self-Evolving Market Dynamics Research Assistant
+# GTM Product Analyzer Agent — Self-Evolving Market Dynamics Research Assistant
 
 > A Fiserv-focused AI research assistant that learns from both wins and failures to surface smarter Go-To-Market strategy.
 

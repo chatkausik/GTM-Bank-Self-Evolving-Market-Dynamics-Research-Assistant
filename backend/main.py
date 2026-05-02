@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="GTM Bank — Self-Evolving Market Dynamics Research Assistant",
+    title="GTM Product Analyzer Agent — Self-Evolving Market Dynamics Research Assistant",
     version="3.0.0",
     lifespan=lifespan,
 )
