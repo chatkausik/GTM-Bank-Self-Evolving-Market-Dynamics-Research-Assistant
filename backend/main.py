@@ -16,7 +16,7 @@ from .memory_extractor import extract_memories, consolidate_outcome
 from .gtm_assistant import research, follow_up, challenge_strategy
 from .scorer import score_plan
 from .analytics import compute_analytics
-from .competitors import synthesize_competitor_hub
+from .competitors import synthesize_competitor_hub, synthesize_competitor_timeline
 from .seed_data import SEED_MEMORIES
 from .fiserv_history import FISERV_HISTORY
 
@@ -29,6 +29,7 @@ FRONTEND_DIR  = BASE_DIR / "frontend"
 bank = ReasoningBank(persist_directory=CHROMA_DIR)
 
 _competitors_cache: list[dict] | None = None
+_timeline_cache: dict | None = None
 
 
 @asynccontextmanager
@@ -301,3 +302,19 @@ async def get_competitors(refresh: bool = False):
         raise HTTPException(500, f"Competitor synthesis error: {e}")
     _competitors_cache = profiles
     return {"competitors": profiles, "cached": False}
+
+
+@app.get("/api/competitor-timeline")
+async def get_competitor_timeline(refresh: bool = False):
+    """Real-time quarterly product timeline for top 5 Fiserv competitors + Fiserv recommendations."""
+    global _timeline_cache
+    if _timeline_cache is not None and not refresh:
+        return {**_timeline_cache, "cached": True}
+    memories = bank.get_all_memories()
+    try:
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(None, synthesize_competitor_timeline, memories)
+    except Exception as e:
+        raise HTTPException(500, f"Timeline synthesis error: {e}")
+    _timeline_cache = result
+    return {**result, "cached": False}
